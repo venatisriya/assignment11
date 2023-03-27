@@ -46,16 +46,6 @@ Looking more carefully through the code, I saw that the first for loop was writt
 +         outlier.vec[i] <- all(outliers[i,]) 
 +     } 
 +     return(outlier.vec)}
-> tukey_multiple <- function(x){
-+     outliers <- array(TRUE, dim = dim(x))
-+     for (j in 1:ncol(x))
-+     {
-+         outliers[,j] <- outliers[,j]&&tukey.outlier(x[,j])
-+     }
-+     outlier.vec <- vector(length = nrow(x))
-+     for (i in 1:nrow(x))
-+     { outlier.vec[i] <- all(outliers[i,]) } 
-+     return(outlier.vec)}
 ```
 
 Running this code, I found that the error message now disappeared. 
@@ -77,16 +67,6 @@ The bug-free code is:
 +     { 
 +         outlier.vec[i] <- all(outliers[i,]) 
 +     } 
-+     return(outlier.vec)}
-> tukey_multiple <- function(x){
-+     outliers <- array(TRUE, dim = dim(x))
-+     for (j in 1:ncol(x))
-+     {
-+         outliers[,j] <- outliers[,j]&&tukey.outlier(x[,j])
-+     }
-+     outlier.vec <- vector(length = nrow(x))
-+     for (i in 1:nrow(x))
-+     { outlier.vec[i] <- all(outliers[i,]) } 
 +     return(outlier.vec)}
 ```
 
@@ -151,6 +131,55 @@ After prviding the function definitions for `tukey.outlier()` and `quartile()`, 
 ```
 
 This shows me that the `tukey_multiple()` function is now debugged correctly and is running without any issue on a test case. 
+
+**Finally, the debugged function is:** 
+
+```
+> tukey_multiple <- function(x){
++     outliers <- array(TRUE, dim = dim(x))
++     for (j in 1:ncol(x))
++     {
++         outliers[,j] <- outliers[,j]&&tukey.outlier(x[,j])
++     }
++     outlier.vec <- vector(length = nrow(x))
++     for (i in 1:nrow(x))
++     { 
++         outlier.vec[i] <- all(outliers[i,]) 
++     } 
++     return(outlier.vec)}
+```
+
+**Including the functions required, the final working code is:**
+
+```
+> quartiles <- function(x) {
++     q1<-quantile(x,0.25,names=FALSE)
++     q3<-quantile(x,0.75,names=FALSE)
++     quartiles <- c(first=q1,third=q3,iqr=q3-q1)
++     return(quartiles)
++ }
+> tukey.outlier <- function(x) {
++     quartiles <- quartiles(x)
++     lower.limit <- quartiles[1]-1.5*quartiles[3]
++     upper.limit <- quartiles[2]+1.5*quartiles[3]
++     outliers <- ((x < lower.limit) | (x > upper.limit))
++     return(outliers)
++ }
+> tukey_multiple <- function(x){
++     outliers <- array(TRUE, dim = dim(x))
++     for (j in 1:ncol(x))
++     {
++         outliers[,j] <- outliers[,j]&&tukey.outlier(x[,j])
++     }
++     outlier.vec <- vector(length = nrow(x))
++     for (i in 1:nrow(x))
++     { 
++         outlier.vec[i] <- all(outliers[i,]) 
++     } 
++     return(outlier.vec)}
+> tukey_multiple(array_test)
+```
+
 
 This assignment taught me debugging procedures used in R and was quite fun!
 
