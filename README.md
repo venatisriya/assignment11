@@ -83,9 +83,27 @@ Running the test case with the debugged function, I encountered the following er
 > tukey_multiple(array_test)
 Error in tukey.outlier(x[, j]) : could not find function "tukey.outlier"
 ```
+I also ran the `debug()` function as follows:
+```
+> debug(tukey_multiple(array_test))
+debugging in: tukey_multiple(array_test)
+debug at #1: {
+    outliers <- array(TRUE, dim = dim(x))
+    for (j in 1:ncol(x)) {
+        outliers[, j] <- outliers[, j] && tukey.outlier(x[, j])
+    }
+    outlier.vec <- vector(length = nrow(x))
+    for (i in 1:nrow(x)) {
+        outlier.vec[i] <- all(outliers[i, ])
+    }
+    return(outlier.vec)
+}
+Browse[2]> c
+Error in tukey.outlier(x[, j]) : could not find function "tukey.outlier"
+```
 
-This error tells me that the function `tukey.outlier` is not defined. 
-I looked up this function and found the function definition. 
+This also threw the same error. This error tells me that the function `tukey.outlier` is not defined. 
+I looked up this function and found the function definition and put it into the code.
 
 ```
 > tukey.outlier <- function(x) {
@@ -97,8 +115,28 @@ I looked up this function and found the function definition.
 + }
 ```
 
-However, this `tukey.outlier` function requires another function to be defined: `quartiles`
-I looked up this function as well and found the following. 
+Running the `debug()` function as before, I obtained:
+
+```
+> debug(tukey_multiple(array_test))
+debugging in: tukey_multiple(array_test)
+debug at #1: {
+    outliers <- array(TRUE, dim = dim(x))
+    for (j in 1:ncol(x)) {
+        outliers[, j] <- outliers[, j] && tukey.outlier(x[, j])
+    }
+    outlier.vec <- vector(length = nrow(x))
+    for (i in 1:nrow(x)) {
+        outlier.vec[i] <- all(outliers[i, ])
+    }
+    return(outlier.vec)
+}
+Browse[2]> c
+Error in quartiles(x) : could not find function "quartiles"
+```
+
+This error shows that the `tukey.outlier` function requires another function to be defined: `quartiles`
+I looked up this function as well and found the following and put it into the code.
 
 ```
 > quartiles <- function(x) {
@@ -109,8 +147,8 @@ I looked up this function as well and found the following.
 + }
 ```
 
-The function `quantile()` exists in R, hence all the functions are now defined. 
-After prviding the function definitions for `tukey.outlier()` and `quartile()`, I ran `tukey_multiple()` and obtained:
+The function `quantile()` exists in R, hence all the functions are now defined. Hence, there are no more errors. 
+After providing the function definitions for `tukey.outlier()` and `quartile()`, I ran `tukey_multiple()` and obtained:
 
 ```
 > quartiles <- function(x) {
